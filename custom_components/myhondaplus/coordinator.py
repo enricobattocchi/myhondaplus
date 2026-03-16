@@ -1,13 +1,11 @@
 """Data coordinator for My Honda+."""
 
-import logging
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-
 from pymyhondaplus.api import HondaAPI, HondaAPIError, parse_ev_status
 
 from .const import (
@@ -19,9 +17,8 @@ from .const import (
     CONF_VIN,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    LOGGER,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class HondaDataUpdateCoordinator(DataUpdateCoordinator[dict]):
@@ -35,7 +32,7 @@ class HondaDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         interval = entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         super().__init__(
             hass,
-            logger,
+            LOGGER,
             name=DOMAIN,
             update_interval=timedelta(seconds=interval),
         )

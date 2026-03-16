@@ -1,17 +1,14 @@
 """Button platform for My Honda+."""
 
 from dataclasses import dataclass
-from typing import Callable
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_VIN, DOMAIN
-from .coordinator import HondaDataUpdateCoordinator
+from .const import CONF_VIN
+from .data import MyHondaPlusConfigEntry
+from .entity import MyHondaPlusEntity
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -73,10 +70,11 @@ BUTTON_DESCRIPTIONS: list[HondaButtonDescription] = [
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: MyHondaPlusConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: HondaDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up My Honda+ buttons."""
+    coordinator = entry.runtime_data.coordinator
     vin = entry.data[CONF_VIN]
     async_add_entities(
         HondaButton(coordinator, description, vin)
@@ -84,27 +82,8 @@ async def async_setup_entry(
     )
 
 
-class HondaButton(CoordinatorEntity[HondaDataUpdateCoordinator], ButtonEntity):
-    _attr_has_entity_name = True
-
-    def __init__(
-        self,
-        coordinator: HondaDataUpdateCoordinator,
-        description: HondaButtonDescription,
-        vin: str,
-    ) -> None:
-        super().__init__(coordinator)
-        self.entity_description = description
-        self._attr_unique_id = f"{vin}_{description.key}"
-        self._vin = vin
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._vin)},
-            name=f"Honda {self._vin[-6:]}",
-            manufacturer="Honda",
-        )
+class HondaButton(MyHondaPlusEntity, ButtonEntity):
+    """My Honda+ button entity."""
 
     async def async_press(self) -> None:
         action = self.entity_description.action

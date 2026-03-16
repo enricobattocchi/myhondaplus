@@ -8,15 +8,19 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfSpeed, UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfLength,
+    UnitOfSpeed,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_VIN, DOMAIN
-from .coordinator import HondaDataUpdateCoordinator
+from .const import CONF_VIN
+from .data import MyHondaPlusConfigEntry
+from .entity import MyHondaPlusEntity
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -143,10 +147,11 @@ SENSOR_DESCRIPTIONS: list[HondaSensorDescription] = [
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: MyHondaPlusConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: HondaDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    """Set up My Honda+ sensors."""
+    coordinator = entry.runtime_data.coordinator
     vin = entry.data[CONF_VIN]
     async_add_entities(
         HondaSensor(coordinator, description, vin)
@@ -154,27 +159,8 @@ async def async_setup_entry(
     )
 
 
-class HondaSensor(CoordinatorEntity[HondaDataUpdateCoordinator], SensorEntity):
-    _attr_has_entity_name = True
-
-    def __init__(
-        self,
-        coordinator: HondaDataUpdateCoordinator,
-        description: HondaSensorDescription,
-        vin: str,
-    ) -> None:
-        super().__init__(coordinator)
-        self.entity_description = description
-        self._attr_unique_id = f"{vin}_{description.key}"
-        self._vin = vin
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._vin)},
-            name=f"Honda {self._vin[-6:]}",
-            manufacturer="Honda",
-        )
+class HondaSensor(MyHondaPlusEntity, SensorEntity):
+    """My Honda+ sensor entity."""
 
     @property
     def native_value(self):

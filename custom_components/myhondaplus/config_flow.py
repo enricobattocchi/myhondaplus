@@ -1,13 +1,9 @@
 """Config flow for My Honda+."""
 
-import logging
-
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_SCAN_INTERVAL
-
-from pymyhondaplus.api import HondaAPI, HondaAPIError
+from pymyhondaplus.api import HondaAPI
 from pymyhondaplus.auth import DeviceKey, HondaAuth
 
 from .const import (
@@ -19,9 +15,8 @@ from .const import (
     CONF_VIN,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    LOGGER,
 )
-
-logger = logging.getLogger(__name__)
 
 STEP_USER_DATA_SCHEMA = vol.Schema({
     vol.Required(CONF_EMAIL): str,
@@ -82,10 +77,10 @@ class MyHondaPlusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 elif "locked-account" in error_text.lower():
                     errors["base"] = "account_locked"
                 else:
-                    logger.error("Login failed: %s", e)
+                    LOGGER.error("Login failed: %s", e)
                     errors["base"] = "cannot_connect"
             except Exception:
-                logger.exception("Unexpected error during login")
+                LOGGER.exception("Unexpected error during login")
                 errors["base"] = "cannot_connect"
 
         return self._show_user_form(errors)
@@ -117,7 +112,7 @@ class MyHondaPlusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     )
                     return await self._create_entry(tokens)
                 except RuntimeError as e:
-                    logger.error("Login after verification failed: %s", e)
+                    LOGGER.error("Login after verification failed: %s", e)
                     errors["base"] = "verification_failed"
 
         return self.async_show_form(

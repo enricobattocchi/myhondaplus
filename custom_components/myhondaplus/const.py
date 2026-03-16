@@ -1,3 +1,7 @@
+import logging
+
+LOGGER = logging.getLogger(__package__)
+
 DOMAIN = "myhondaplus"
 
 CONF_REFRESH_TOKEN = "refresh_token"

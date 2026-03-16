@@ -4,7 +4,8 @@
   "codeowners": [],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "",
+  "documentation": "https://github.com/enricobattocchi/myhondaplus",
+  "issue_tracker": "https://github.com/enricobattocchi/myhondaplus/issues",
   "iot_class": "cloud_polling",
   "requirements": ["pymyhondaplus @ git+https://github.com/enricobattocchi/pymyhondaplus.git"],
   "version": "0.1.0"
