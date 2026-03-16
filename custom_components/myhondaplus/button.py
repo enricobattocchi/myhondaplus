@@ -51,6 +51,18 @@ BUTTON_DESCRIPTIONS: list[HondaButtonDescription] = [
         action="climate_stop",
     ),
     HondaButtonDescription(
+        key="charge_start",
+        translation_key="charge_start",
+        icon="mdi:battery-charging",
+        action="charge_start",
+    ),
+    HondaButtonDescription(
+        key="charge_stop",
+        translation_key="charge_stop",
+        icon="mdi:battery-off",
+        action="charge_stop",
+    ),
+    HondaButtonDescription(
         key="refresh_data",
         translation_key="refresh_data",
         icon="mdi:refresh",
@@ -109,6 +121,10 @@ class HondaButton(CoordinatorEntity[HondaDataUpdateCoordinator], ButtonEntity):
             await self.coordinator.async_send_command(api.remote_climate_start, vin)
         elif action == "climate_stop":
             await self.coordinator.async_send_command(api.remote_climate_stop, vin)
+        elif action == "charge_start":
+            await self.coordinator.async_send_command(api.remote_charge_start, vin)
+        elif action == "charge_stop":
+            await self.coordinator.async_send_command(api.remote_charge_stop, vin)
         elif action == "refresh":
             await self.coordinator.async_refresh_from_car()
             self.hass.async_create_task(

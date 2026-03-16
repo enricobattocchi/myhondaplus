@@ -46,6 +46,8 @@
       "horn_lights": { "name": "Horn & lights" },
       "climate_start": { "name": "Climate start" },
       "climate_stop": { "name": "Climate stop" },
+      "charge_start": { "name": "Start charging" },
+      "charge_stop": { "name": "Stop charging" },
       "refresh_data": { "name": "Refresh from car" }
     },
     "number": {
