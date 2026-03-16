@@ -8,14 +8,24 @@ Tested on Honda e. Should work with other Honda Connect Europe vehicles (e:Ny1, 
 
 ### HACS (recommended)
 
-1. Add this repository as a custom repository in HACS
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=enricobattocchi&repository=myhondaplus&category=integration)
+
+1. Click the button above, or search for "My Honda+" in HACS under Integrations
 2. Install "My Honda+"
 3. Restart Home Assistant
 4. Add the integration via Settings > Integrations > Add Integration > "My Honda+"
 
-### Manual
+HACS will track updates automatically, making it easy to upgrade.
 
-Copy `custom_components/myhondaplus` to your Home Assistant `custom_components` directory.
+<details>
+<summary><h3>Manual installation</h3></summary>
+
+1. Download the `myhondaplus.zip` from the [latest release](https://github.com/enricobattocchi/myhondaplus/releases/latest)
+2. Extract the `custom_components/myhondaplus` folder into your Home Assistant `config/custom_components/` directory
+3. Restart Home Assistant
+4. Add the integration via Settings > Integrations > Add Integration > "My Honda+"
+
+</details>
 
 ## Configuration
 
