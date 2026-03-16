@@ -1,0 +1,55 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "My Honda+",
+        "description": "Enter your My Honda+ account credentials",
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "vin": "Vehicle Identification Number (VIN)",
+          "scan_interval": "Update interval (seconds)"
+        }
+      },
+      "verify": {
+        "title": "Email verification",
+        "description": "Honda sent a verification email. Copy the link URL from the email (do NOT click it) and paste it below.",
+        "data": {
+          "verification_link": "Verification link from email"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Honda API",
+      "invalid_auth": "Invalid email or password",
+      "account_locked": "Account is locked. Try again later.",
+      "invalid_link": "Could not parse verification link. Copy the full URL.",
+      "verification_failed": "Verification failed. Try again."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_level": { "name": "Battery" },
+      "range": { "name": "Range" },
+      "charge_status": { "name": "Charge status" },
+      "plug_status": { "name": "Plug status" },
+      "climate_active": { "name": "Climate active" },
+      "cabin_temperature": { "name": "Cabin temperature" },
+      "odometer": { "name": "Odometer" },
+      "doors_locked": { "name": "Doors locked" },
+      "windows_closed": { "name": "Windows closed" },
+      "last_updated": { "name": "Last updated" }
+    },
+    "button": {
+      "lock": { "name": "Lock doors" },
+      "horn_lights": { "name": "Horn & lights" },
+      "climate_start": { "name": "Climate start" },
+      "climate_stop": { "name": "Climate stop" },
+      "refresh_data": { "name": "Refresh from car" }
+    },
+    "number": {
+      "charge_limit_home": { "name": "Charge limit (home)" },
+      "charge_limit_away": { "name": "Charge limit (away)" }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "myhondaplus",
+  "name": "My Honda+",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "",
+  "iot_class": "cloud_polling",
+  "requirements": ["pymyhondaplus"],
+  "version": "0.1.0"
+}

@@ -1,0 +1,161 @@
+"""Config flow for My Honda+."""
+
+import logging
+
+import voluptuous as vol
+
+from homeassistant import config_entries
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_SCAN_INTERVAL
+
+from pymyhondaplus.api import HondaAPI, HondaAPIError
+from pymyhondaplus.auth import DeviceKey, HondaAuth
+
+from .const import (
+    CONF_ACCESS_TOKEN,
+    CONF_DEVICE_KEY_PEM,
+    CONF_PERSONAL_ID,
+    CONF_REFRESH_TOKEN,
+    CONF_USER_ID,
+    CONF_VIN,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+)
+
+logger = logging.getLogger(__name__)
+
+STEP_USER_DATA_SCHEMA = vol.Schema({
+    vol.Required(CONF_EMAIL): str,
+    vol.Required(CONF_PASSWORD): str,
+    vol.Required(CONF_VIN): str,
+    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
+})
+
+STEP_VERIFY_DATA_SCHEMA = vol.Schema({
+    vol.Required("verification_link"): str,
+})
+
+
+class MyHondaPlusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    VERSION = 1
+
+    def __init__(self):
+        self._email = None
+        self._password = None
+        self._vin = None
+        self._scan_interval = DEFAULT_SCAN_INTERVAL
+        self._device_key = None
+        self._auth = None
+
+    async def async_step_user(self, user_input=None):
+        errors = {}
+
+        if user_input is not None:
+            self._email = user_input[CONF_EMAIL]
+            self._password = user_input[CONF_PASSWORD]
+            self._vin = user_input[CONF_VIN]
+            self._scan_interval = user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+
+            self._device_key = DeviceKey()
+            self._auth = HondaAuth(device_key=self._device_key)
+
+            try:
+                tokens = await self.hass.async_add_executor_job(
+                    self._auth.login, self._email, self._password,
+                )
+                return await self._create_entry(tokens)
+            except RuntimeError as e:
+                error_text = str(e)
+                if "device-authenticator-not-registered" in error_text:
+                    try:
+                        await self.hass.async_add_executor_job(
+                            self._auth.reset_device_authenticator,
+                            self._email, self._password,
+                        )
+                    except RuntimeError as e2:
+                        if "currently blocked" not in str(e2):
+                            errors["base"] = "cannot_connect"
+                            return self._show_user_form(errors)
+
+                    return await self.async_step_verify()
+                elif "invalid-credentials" in error_text.lower() or "INVALID_CREDS" in error_text:
+                    errors["base"] = "invalid_auth"
+                elif "locked-account" in error_text.lower():
+                    errors["base"] = "account_locked"
+                else:
+                    logger.error("Login failed: %s", e)
+                    errors["base"] = "cannot_connect"
+            except Exception:
+                logger.exception("Unexpected error during login")
+                errors["base"] = "cannot_connect"
+
+        return self._show_user_form(errors)
+
+    def _show_user_form(self, errors=None):
+        return self.async_show_form(
+            step_id="user",
+            data_schema=STEP_USER_DATA_SCHEMA,
+            errors=errors or {},
+        )
+
+    async def async_step_verify(self, user_input=None):
+        errors = {}
+
+        if user_input is not None:
+            link = user_input["verification_link"].strip()
+            key, link_type = HondaAuth.parse_verify_link_key(link)
+
+            if not key:
+                errors["base"] = "invalid_link"
+            else:
+                await self.hass.async_add_executor_job(
+                    self._auth.verify_magic_link, key, link_type,
+                )
+
+                try:
+                    tokens = await self.hass.async_add_executor_job(
+                        self._auth.login, self._email, self._password,
+                    )
+                    return await self._create_entry(tokens)
+                except RuntimeError as e:
+                    logger.error("Login after verification failed: %s", e)
+                    errors["base"] = "verification_failed"
+
+        return self.async_show_form(
+            step_id="verify",
+            data_schema=STEP_VERIFY_DATA_SCHEMA,
+            errors=errors,
+        )
+
+    async def _create_entry(self, tokens: dict):
+        user_id = HondaAuth.extract_user_id(tokens["access_token"])
+
+        api = HondaAPI()
+        api.set_tokens(
+            access_token=tokens["access_token"],
+            refresh_token=tokens["refresh_token"],
+            user_id=user_id,
+        )
+        try:
+            info = await self.hass.async_add_executor_job(
+                api.get_user_info, user_id,
+            )
+            personal_id = str(info.get("personalId", ""))
+        except Exception:
+            personal_id = ""
+
+        await self.async_set_unique_id(self._vin)
+        self._abort_if_unique_id_configured()
+
+        return self.async_create_entry(
+            title=f"Honda {self._vin[-6:]}",
+            data={
+                CONF_EMAIL: self._email,
+                CONF_VIN: self._vin,
+                CONF_SCAN_INTERVAL: self._scan_interval,
+                CONF_ACCESS_TOKEN: tokens["access_token"],
+                CONF_REFRESH_TOKEN: tokens["refresh_token"],
+                CONF_USER_ID: user_id,
+                CONF_PERSONAL_ID: personal_id,
+                CONF_DEVICE_KEY_PEM: self._device_key.pem_bytes.decode(),
+            },
+        )
