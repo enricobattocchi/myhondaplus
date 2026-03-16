@@ -6,6 +6,6 @@
   "dependencies": [],
   "documentation": "",
   "iot_class": "cloud_polling",
-  "requirements": ["pymyhondaplus"],
+  "requirements": ["pymyhondaplus @ git+https://github.com/enricobattocchi/pymyhondaplus.git"],
   "version": "0.1.0"
 }
