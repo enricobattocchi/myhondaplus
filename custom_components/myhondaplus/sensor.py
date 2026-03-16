@@ -9,7 +9,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfTemperature
+from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfSpeed, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -81,6 +81,59 @@ SENSOR_DESCRIPTIONS: list[HondaSensorDescription] = [
         icon="mdi:car-door",
     ),
     HondaSensorDescription(
+        key="ignition",
+        translation_key="ignition",
+        icon="mdi:car-key",
+    ),
+    HondaSensorDescription(
+        key="speed_kmh",
+        translation_key="speed",
+        native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
+        device_class=SensorDeviceClass.SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:speedometer",
+    ),
+    HondaSensorDescription(
+        key="charge_mode",
+        translation_key="charge_mode",
+        icon="mdi:ev-station",
+    ),
+    HondaSensorDescription(
+        key="time_to_charge",
+        translation_key="time_to_charge",
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:battery-clock",
+    ),
+    HondaSensorDescription(
+        key="interior_temp_c",
+        translation_key="interior_temperature",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    HondaSensorDescription(
+        key="hood_open",
+        translation_key="hood",
+        icon="mdi:car",
+    ),
+    HondaSensorDescription(
+        key="trunk_open",
+        translation_key="trunk",
+        icon="mdi:car-back",
+    ),
+    HondaSensorDescription(
+        key="lights_on",
+        translation_key="lights",
+        icon="mdi:car-light-high",
+    ),
+    HondaSensorDescription(
+        key="warning_lamps",
+        translation_key="warnings",
+        icon="mdi:alert",
+    ),
+    HondaSensorDescription(
         key="timestamp",
         translation_key="last_updated",
         icon="mdi:clock-outline",
@@ -125,4 +178,7 @@ class HondaSensor(CoordinatorEntity[HondaDataUpdateCoordinator], SensorEntity):
 
     @property
     def native_value(self):
-        return self.coordinator.data.get(self.entity_description.key)
+        value = self.coordinator.data.get(self.entity_description.key)
+        if isinstance(value, list):
+            return ", ".join(str(v) for v in value) if value else "none"
+        return value

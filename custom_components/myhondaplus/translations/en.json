@@ -38,6 +38,15 @@
       "odometer": { "name": "Odometer" },
       "doors_locked": { "name": "Doors locked" },
       "windows_closed": { "name": "Windows closed" },
+      "ignition": { "name": "Ignition" },
+      "speed": { "name": "Speed" },
+      "charge_mode": { "name": "Charge mode" },
+      "time_to_charge": { "name": "Time to full charge" },
+      "interior_temperature": { "name": "Interior temperature" },
+      "hood": { "name": "Hood" },
+      "trunk": { "name": "Trunk" },
+      "lights": { "name": "Lights" },
+      "warnings": { "name": "Warning lamps" },
       "last_updated": { "name": "Last updated" }
     },
     "button": {
