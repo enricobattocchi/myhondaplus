@@ -2,7 +2,7 @@
 
 Home Assistant custom component for Honda Connect Europe vehicles (My Honda+ app).
 
-Works with Honda e, e:Ny1, ZR-V, CR-V, Civic, HR-V, Jazz (2020+) in Europe.
+Tested on Honda e. Should work with other Honda Connect Europe vehicles (e:Ny1, ZR-V, CR-V, Civic, HR-V, Jazz 2020+) but these are untested — contributions welcome!
 
 ## Installation
 
